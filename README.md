@@ -23,3 +23,4 @@ I recommend using this with Conda.
 1. Copy the `geocoder.py` into your project.
 2. `import geocoder` into your script.
 3. Run it with `geocoder.geocode(df, address_col, data_folder, GOOGLE_MAPS_API_KEY)`. Example `geocoder.geocode(my_df, 'formatted_address', 'geocoded_output/', 'YOUR_GOOGLE_API_KEY')`.
+4. If you want to use it with slugs for address IDs instead of SHA hashes, pass `slugify=True` to the `geocode` method.

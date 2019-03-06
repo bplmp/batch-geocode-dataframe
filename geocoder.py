@@ -5,6 +5,7 @@ from pandas.io.json import json_normalize
 import glob
 import os
 from pathlib import Path
+from slugify import slugify
 import hashlib
 
 
@@ -65,7 +66,7 @@ def geocode_addresses(addresses, address_col, id_col, folder_path, geopy_geocode
     print('--->done.')
 
 
-def geocode(df, address_col, data_folder, GOOGLE_MAPS_API_KEY):
+def geocode(df, address_col, data_folder, GOOGLE_MAPS_API_KEY, slugify=False):
     geopy_geocoder = geopy.geocoders.GoogleV3(api_key=GOOGLE_MAPS_API_KEY, timeout=20)
 
     # drop null
@@ -75,9 +76,14 @@ def geocode(df, address_col, data_folder, GOOGLE_MAPS_API_KEY):
     df['geocode'] = df[address_col].str.upper()
 
     # generate hash for file name and joins
-    df['geocode_hash'] = df['geocode'].apply(lambda x: hashlib.sha1(x.encode('utf-8')).hexdigest())
-    df_address = df[df.geocode.notna()][['geocode', 'geocode_hash']]
-    df_address = df_address.drop_duplicates('geocode')
+    if slugify:
+        df['geocode_hash'] = df['geocode'].apply(lambda x: slugify(x))
+        df_address = df[df.geocode.notna()][['geocode', 'geocode_hash']]
+        df_address = df_address.drop_duplicates('geocode')
+    else:
+        df['geocode_hash'] = df['geocode'].apply(lambda x: hashlib.sha1(x.encode('utf-8')).hexdigest())
+        df_address = df[df.geocode.notna()][['geocode', 'geocode_hash']]
+        df_address = df_address.drop_duplicates('geocode')
 
     # check for already geocoded
     json_files = glob.glob(data_folder + '*.json')
