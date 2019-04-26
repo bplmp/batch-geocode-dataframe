@@ -66,7 +66,7 @@ def geocode_addresses(addresses, address_col, id_col, folder_path, geopy_geocode
     print('--->done.')
 
 
-def geocode(df, address_col, data_folder, GOOGLE_MAPS_API_KEY, slugify=False):
+def geocode(df, address_col, data_folder, GOOGLE_MAPS_API_KEY, use_slugify=False):
     geopy_geocoder = geopy.geocoders.GoogleV3(api_key=GOOGLE_MAPS_API_KEY, timeout=20)
 
     # drop null
@@ -76,7 +76,7 @@ def geocode(df, address_col, data_folder, GOOGLE_MAPS_API_KEY, slugify=False):
     df['geocode'] = df[address_col].str.upper()
 
     # generate hash for file name and joins
-    if slugify:
+    if use_slugify:
         df['geocode_hash'] = df['geocode'].apply(lambda x: slugify(x))
         df_address = df[df.geocode.notna()][['geocode', 'geocode_hash']]
         df_address = df_address.drop_duplicates('geocode')
