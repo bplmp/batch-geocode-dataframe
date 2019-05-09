@@ -18,10 +18,7 @@ def load_geocoded_addresses(path_to_folder):
         e['filename'] = filename
         e_df = pd.DataFrame.from_dict(json_normalize(e))
         frames.append(e_df)
-    if len(frames) > 0:
-        geocoded_data = pd.concat(frames, sort=True)
-    else:
-        geocoded_data = None
+    geocoded_data = pd.concat(frames, sort=True)
     return geocoded_data
 
 
@@ -95,18 +92,14 @@ def geocode(df, address_col, data_folder, GOOGLE_MAPS_API_KEY, use_slugify=False
         hashes.append(os.path.splitext(os.path.basename(f))[0])
     not_geo = df_address[~(df_address.geocode_hash.isin(hashes))]
     already_geo = df_address[(df_address.geocode_hash.isin(hashes))]
-    print('--->{} already geocoded, will geocode {} addresses'.format(len(already_geo), len(not_geo)))
+    print(f'--->{len(already_geo)} already geocoded, will geocode {len(not_geo)} addresses')
 
     # geocode
-    if os.path.isdir(data_folder) is False:
-        Path(data_folder).mkdir(parents=True)
+    Path(data_folder).mkdir(parents=True, exist_ok=True)
     geocode_addresses(not_geo, 'geocode', 'geocode_hash', data_folder, geopy_geocoder)
 
     # join back on original df and return
     df_geocoded_data = load_geocoded_addresses(data_folder)
-    if isinstance(df_geocoded_data, pd.DataFrame):
-        df_address_geocoded = join_geocoded_addresses_to_df(df_address, df_geocoded_data)
-        df_geocoded = df.merge(df_address_geocoded.drop('geocode', axis=1), how='left', on='geocode_hash')
-    else:
-        df_geocoded = None
+    df_address_geocoded = join_geocoded_addresses_to_df(df_address, df_geocoded_data)
+    df_geocoded = df.merge(df_address_geocoded.drop('geocode', axis=1), how='left', on='geocode_hash')
     return df_geocoded
