@@ -2,3 +2,5 @@ data/
 exported/
 geocoded/
 __pycache__
+geo/
+*.pyc
